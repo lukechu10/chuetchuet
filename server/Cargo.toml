@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-juniper = "0.15.9"
-juniper_rocket = "0.8.1"
-rocket = "=0.5.0-rc.1" # For juniper_rocket
+juniper = { git = "https://github.com/graphql-rust/juniper", rev = "1f0f683" }
+juniper_rocket = { git = "https://github.com/graphql-rust/juniper", rev = "1f0f683" } # rocket 0.5.0-rc.2 support
+rocket = "0.5.0-rc.2"
 sqlx = { version = "0.5.13", features = ["runtime-tokio-rustls", "postgres"] }
