@@ -26,6 +26,7 @@ impl Query {
         "0.1.0"
     }
 
+    /// Returns a single product with the specified id.
     async fn product(context: &Context, id: i32) -> FieldResult<Product> {
         let product = sqlx::query!("SELECT id, name FROM products WHERE id = $1", id)
             .fetch_one(&context.pool)
@@ -36,6 +37,7 @@ impl Query {
         })
     }
 
+    /// Returns all the products.
     async fn products(context: &Context) -> FieldResult<Vec<Product>> {
         let products = sqlx::query!("SELECT id, name FROM products")
             .fetch_all(&context.pool)
