@@ -1,9 +1,11 @@
 mod schema;
 
+use anyhow::Result;
 use juniper::EmptySubscription;
 use rocket::response::content;
-use rocket::{catch, catchers, get, launch, routes, State};
+use rocket::{catch, catchers, get, routes, State};
 use schema::{Context, Mutation, Query, Schema};
+use sqlx::postgres::PgPoolOptions;
 
 #[catch(404)]
 fn not_found() -> &'static str {
@@ -16,27 +18,34 @@ fn graphiql() -> content::RawHtml<String> {
 }
 
 #[rocket::get("/graphql?<request>")]
-fn get_graphql_handler(
+async fn get_graphql_handler(
     context: &State<Context>,
     request: juniper_rocket::GraphQLRequest,
     schema: &State<Schema>,
 ) -> juniper_rocket::GraphQLResponse {
-    request.execute_sync(&**schema, &*context)
+    request.execute(&*schema, &*context).await
 }
 
 #[rocket::post("/graphql", data = "<request>")]
-fn post_graphql_handler(
+async fn post_graphql_handler(
     context: &State<Context>,
     request: juniper_rocket::GraphQLRequest,
     schema: &State<Schema>,
 ) -> juniper_rocket::GraphQLResponse {
-    request.execute_sync(&*schema, &*context)
+    request.execute(&*schema, &*context).await
 }
 
-#[launch]
-fn rocket() -> _ {
-    rocket::build()
-        .manage(Context {})
+#[rocket::main]
+async fn main() -> Result<()> {
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect("postgres://myuser:pass1234@localhost/db")
+        .await?;
+
+    sqlx::migrate!().run(&pool).await?;
+
+    let _rocket = rocket::build()
+        .manage(Context { pool })
         .manage(Schema::new(
             Query,
             Mutation,
@@ -47,4 +56,8 @@ fn rocket() -> _ {
             routes![graphiql, get_graphql_handler, post_graphql_handler],
         )
         .register("/", catchers![not_found])
+        .launch()
+        .await?;
+
+    Ok(())
 }
