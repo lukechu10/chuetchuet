@@ -1,8 +1,10 @@
+pub mod auth;
 pub mod product;
 
 use juniper::{graphql_object, EmptySubscription};
 use sqlx::{Pool, Postgres};
 
+use self::auth::{AuthMutation, AuthQuery};
 use self::product::{ProductMutation, ProductQuery};
 
 /// The GraphQL context.
@@ -23,6 +25,10 @@ impl Query {
     fn product() -> ProductQuery {
         ProductQuery
     }
+
+    fn auth() -> AuthQuery {
+        AuthQuery
+    }
 }
 
 /// The GraphQL mutation object.
@@ -32,6 +38,10 @@ pub struct Mutation;
 impl Mutation {
     fn product() -> ProductMutation {
         ProductMutation
+    }
+
+    fn auth() -> AuthMutation {
+        AuthMutation
     }
 }
 
