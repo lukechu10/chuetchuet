@@ -5,11 +5,24 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.57"
+base64 = "0.13.0"
 chrono = "0.4.19"
+dotenv = "0.15.0"
 jsonwebtoken = "8.1.0"
-juniper = { git = "https://github.com/graphql-rust/juniper", rev = "1f0f683", features = ["chrono"] }
+juniper = { git = "https://github.com/graphql-rust/juniper", rev = "1f0f683", features = [
+    "chrono",
+] }
 juniper_rocket = { git = "https://github.com/graphql-rust/juniper", rev = "1f0f683" } # rocket 0.5.0-rc.2 support
+once_cell = "1.10.0"
+rand = "0.8.5"
+regex = "1.5.5"
 rocket = "0.5.0-rc.2"
 rust-argon2 = "1.0.0"
-sqlx = { version = "0.5.13", features = ["runtime-tokio-rustls", "postgres"] }
-uuid = "1.0.0"
+serde = { version = "1.0.137", features = ["derive"] }
+sqlx = { git = "https://github.com/launchbadge/sqlx", rev = "fa5c436", features = [
+    "runtime-tokio-rustls",
+    "postgres",
+    "chrono",
+    "uuid",
+] } # uuid 1.0 support
+uuid = { version = "1.0.0", features = ["v4", "serde"] }
