@@ -1,6 +1,7 @@
 use async_graphql::{Context, InputObject, Object, Result, SimpleObject};
 use sqlx::PgPool;
 
+#[derive(Default)]
 pub struct ProductQuery;
 
 /// A product.
@@ -18,18 +19,18 @@ pub struct NewProduct {
 #[Object]
 impl ProductQuery {
     /// Returns a single product with the specified id.
-    async fn get_product(&self, context: &Context<'_>, id: i32) -> Result<Product> {
-        let product = sqlx::query!("SELECT id, name FROM products WHERE id = $1", id)
+    async fn product(&self, context: &Context<'_>, product_id: i32) -> Result<Product> {
+        let product = sqlx::query!("SELECT name FROM products WHERE id = $1", product_id)
             .fetch_one(context.data::<PgPool>().unwrap())
             .await?;
         Ok(Product {
-            id: product.id,
+            id: product_id,
             name: product.name,
         })
     }
 
-    /// Returns all the products.
-    async fn get_products(&self, context: &Context<'_>) -> Result<Vec<Product>> {
+    /// Returns a list of all the products.
+    async fn all_products(&self, context: &Context<'_>) -> Result<Vec<Product>> {
         let products = sqlx::query!("SELECT id, name FROM products")
             .fetch_all(context.data::<PgPool>().unwrap())
             .await?
@@ -43,6 +44,7 @@ impl ProductQuery {
     }
 }
 
+#[derive(Default)]
 pub struct ProductMutation;
 
 #[Object]

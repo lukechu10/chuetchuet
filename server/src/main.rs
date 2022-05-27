@@ -1,13 +1,13 @@
-mod schema;
+mod graph;
 
 use anyhow::Result;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::EmptySubscription;
 use async_graphql_rocket::{GraphQLQuery, GraphQLRequest, GraphQLResponse};
+use graph::auth::AuthInfo;
+use graph::{MutationRoot, QueryRoot};
 use rocket::response::content;
 use rocket::{catch, catchers, get, routes, State};
-use schema::auth::AuthInfo;
-use schema::{MutationRoot, QueryRoot};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
 
@@ -52,9 +52,13 @@ async fn main() -> Result<()> {
 
     sqlx::migrate!().run(&pool).await?;
 
-    let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
-        .data(pool)
-        .finish();
+    let schema = Schema::build(
+        QueryRoot::default(),
+        MutationRoot::default(),
+        EmptySubscription,
+    )
+    .data(pool)
+    .finish();
 
     let _rocket = rocket::build()
         .manage(schema)

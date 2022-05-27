@@ -112,15 +112,10 @@ fn create_auth_payload(id: Uuid, email: String) -> AuthPayload {
     AuthPayload { id, email, token }
 }
 
+#[derive(Default)]
 pub struct AuthQuery;
 
-#[Object]
-impl AuthQuery {
-    async fn user(&self) -> UserQuery {
-        UserQuery
-    }
-}
-
+#[derive(Default)]
 pub struct UserQuery;
 
 #[Object]
@@ -136,6 +131,7 @@ impl UserQuery {
     }
 }
 
+#[derive(Default)]
 pub struct AuthMutation;
 
 #[Object]
