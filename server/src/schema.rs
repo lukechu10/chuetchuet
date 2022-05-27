@@ -4,12 +4,15 @@ pub mod product;
 use juniper::{graphql_object, EmptySubscription};
 use sqlx::{Pool, Postgres};
 
+use crate::AuthInfo;
+
 use self::auth::{AuthMutation, AuthQuery};
 use self::product::{ProductMutation, ProductQuery};
 
 /// The GraphQL context.
 pub struct Context {
     pub pool: Pool<Postgres>,
+    pub auth: AuthInfo,
 }
 impl juniper::Context for Context {}
 

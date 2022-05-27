@@ -1,15 +1,62 @@
 use argon2::Config;
 use base64::STANDARD_NO_PAD;
 use chrono::{DateTime, Utc};
-use jsonwebtoken::{EncodingKey, Header};
+use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use juniper::{graphql_object, FieldResult, GraphQLObject};
 use once_cell::sync::Lazy;
 use rand::RngCore;
 use regex::Regex;
+use rocket::request::{FromRequest, Outcome};
+use rocket::Request;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::Context;
+
+/// Extract the JWT from the `Authorization` header, if it exists.
+pub struct AuthInfo {
+    pub token: Option<String>,
+    pub claims: Option<Claims>,
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for AuthInfo {
+    type Error = anyhow::Error;
+
+    async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        match req.headers().get_one("Authorization") {
+            None => Outcome::Success(AuthInfo {
+                token: None,
+                claims: None,
+            }),
+            Some(val) => {
+                if let Some(token) = val.strip_prefix("Bearer ").map(String::from) {
+                    let secret = dotenv::var("JWT_SECRET").expect("could not read JWT_SECRET");
+                    if let Ok(data) = jsonwebtoken::decode(
+                        &token,
+                        &DecodingKey::from_secret(secret.as_bytes()),
+                        &Validation::new(Algorithm::HS256),
+                    ) {
+                        Outcome::Success(AuthInfo {
+                            token: Some(token),
+                            claims: Some(data.claims),
+                        })
+                    } else {
+                        Outcome::Success(AuthInfo {
+                            token: None,
+                            claims: None,
+                        })
+                    }
+                } else {
+                    Outcome::Success(AuthInfo {
+                        token: None,
+                        claims: None,
+                    })
+                }
+            }
+        }
+    }
+}
 
 #[derive(GraphQLObject)]
 pub struct UserResult {
@@ -68,10 +115,20 @@ fn create_auth_payload(id: Uuid, email: String) -> AuthPayload {
 
 pub struct AuthQuery;
 
-#[graphql_object]
+#[graphql_object(context = Context)]
 impl AuthQuery {
-    fn test() -> &'static str {
-        "test"
+    fn user() -> UserQuery {
+        UserQuery
+    }
+}
+
+pub struct UserQuery;
+
+#[graphql_object(context = Context)]
+impl UserQuery {
+    fn id(context: &Context) -> FieldResult<Uuid> {
+        let claims = context.auth.claims.as_ref().ok_or("access denied")?;
+        Ok(claims.id)
     }
 }
 
