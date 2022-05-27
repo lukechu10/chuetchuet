@@ -6,5 +6,7 @@ tasks: []
 ports:
   - port: 8000
     visibility: public
+  - port: 3000
+    visibility: public
   - port: 5432
     onOpen: ignore
