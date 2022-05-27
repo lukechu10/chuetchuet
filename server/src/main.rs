@@ -1,15 +1,18 @@
 mod schema;
 
 use anyhow::Result;
-use juniper::EmptySubscription;
+use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
+use async_graphql::EmptySubscription;
+use async_graphql_rocket::{GraphQLQuery, GraphQLRequest, GraphQLResponse};
 use rocket::response::content;
 use rocket::{catch, catchers, get, routes, State};
 use schema::auth::AuthInfo;
-use schema::{Context, Mutation, Query, Schema};
+use schema::{MutationRoot, QueryRoot};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
 
 pub type DbPool = Pool<Postgres>;
+pub type Schema = async_graphql::Schema<QueryRoot, MutationRoot, EmptySubscription>;
 
 #[catch(404)]
 fn not_found() -> &'static str {
@@ -18,35 +21,26 @@ fn not_found() -> &'static str {
 
 #[get("/")]
 fn graphiql() -> content::RawHtml<String> {
-    juniper_rocket::graphiql_source("/graphql", None)
+    content::RawHtml(playground_source(GraphQLPlaygroundConfig::new("/graphql")))
 }
 
-#[rocket::get("/graphql?<request>")]
+#[rocket::get("/graphql?<query..>")]
 async fn get_graphql_handler(
-    pool: &State<DbPool>,
-    request: juniper_rocket::GraphQLRequest,
+    query: GraphQLQuery,
     schema: &State<Schema>,
     auth: AuthInfo,
-) -> juniper_rocket::GraphQLResponse {
-    let context = Context {
-        pool: (*pool).clone(),
-        auth,
-    };
-    request.execute(&*schema, &context).await
+) -> GraphQLResponse {
+    let request: GraphQLRequest = query.into();
+    request.data(auth).execute(&*schema).await
 }
 
-#[rocket::post("/graphql", data = "<request>")]
+#[rocket::post("/graphql", data = "<request>", format = "application/json")]
 async fn post_graphql_handler(
-    pool: &State<DbPool>,
-    request: juniper_rocket::GraphQLRequest,
+    request: GraphQLRequest,
     schema: &State<Schema>,
     auth: AuthInfo,
-) -> juniper_rocket::GraphQLResponse {
-    let context = Context {
-        pool: (*pool).clone(),
-        auth,
-    };
-    request.execute(&*schema, &context).await
+) -> GraphQLResponse {
+    request.data(auth).execute(&*schema).await
 }
 
 #[rocket::main]
@@ -58,13 +52,12 @@ async fn main() -> Result<()> {
 
     sqlx::migrate!().run(&pool).await?;
 
+    let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
+        .data(pool)
+        .finish();
+
     let _rocket = rocket::build()
-        .manage(pool)
-        .manage(Schema::new(
-            Query,
-            Mutation,
-            EmptySubscription::<Context>::new(),
-        ))
+        .manage(schema)
         .mount(
             "/",
             routes![graphiql, get_graphql_handler, post_graphql_handler],

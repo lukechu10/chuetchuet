@@ -1,51 +1,39 @@
 pub mod auth;
 pub mod product;
 
-use juniper::{graphql_object, EmptySubscription};
-use sqlx::{Pool, Postgres};
-
-use crate::AuthInfo;
+use async_graphql::Object;
 
 use self::auth::{AuthMutation, AuthQuery};
 use self::product::{ProductMutation, ProductQuery};
 
-/// The GraphQL context.
-pub struct Context {
-    pub pool: Pool<Postgres>,
-    pub auth: AuthInfo,
-}
-impl juniper::Context for Context {}
-
 /// The GraphQL query object.
-pub struct Query;
+pub struct QueryRoot;
 
-#[graphql_object(context = Context)]
-impl Query {
-    fn api_version() -> &'static str {
+#[Object]
+impl QueryRoot {
+    async fn api_version(&self) -> &'static str {
         "0.1.0"
     }
 
-    fn product() -> ProductQuery {
+    async fn product(&self) -> ProductQuery {
         ProductQuery
     }
 
-    fn auth() -> AuthQuery {
+    async fn auth(&self) -> AuthQuery {
         AuthQuery
     }
 }
 
 /// The GraphQL mutation object.
-pub struct Mutation;
+pub struct MutationRoot;
 
-#[graphql_object(context = Context)]
-impl Mutation {
-    fn product() -> ProductMutation {
+#[Object]
+impl MutationRoot {
+    async fn product(&self) -> ProductMutation {
         ProductMutation
     }
 
-    fn auth() -> AuthMutation {
+    async fn auth(&self) -> AuthMutation {
         AuthMutation
     }
 }
-
-pub type Schema = juniper::RootNode<'static, Query, Mutation, EmptySubscription<Context>>;

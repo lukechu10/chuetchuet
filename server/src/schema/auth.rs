@@ -1,17 +1,16 @@
 use argon2::Config;
+use async_graphql::{Context, Object, Result, SimpleObject};
 use base64::STANDARD_NO_PAD;
 use chrono::{DateTime, Utc};
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
-use juniper::{graphql_object, FieldResult, GraphQLObject};
 use once_cell::sync::Lazy;
 use rand::RngCore;
 use regex::Regex;
 use rocket::request::{FromRequest, Outcome};
 use rocket::Request;
 use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
 use uuid::Uuid;
-
-use super::Context;
 
 /// Extract the JWT from the `Authorization` header, if it exists.
 pub struct AuthInfo {
@@ -58,7 +57,7 @@ impl<'r> FromRequest<'r> for AuthInfo {
     }
 }
 
-#[derive(GraphQLObject)]
+#[derive(SimpleObject)]
 pub struct UserResult {
     pub id: Uuid,
     pub name: String,
@@ -66,12 +65,12 @@ pub struct UserResult {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(GraphQLObject)]
+#[derive(SimpleObject)]
 pub struct SignupResult {
     pub id: Uuid,
 }
 
-#[derive(GraphQLObject)]
+#[derive(SimpleObject)]
 pub struct AuthPayload {
     pub id: Uuid,
     pub email: String,
@@ -115,34 +114,44 @@ fn create_auth_payload(id: Uuid, email: String) -> AuthPayload {
 
 pub struct AuthQuery;
 
-#[graphql_object(context = Context)]
+#[Object]
 impl AuthQuery {
-    fn user() -> UserQuery {
+    async fn user(&self) -> UserQuery {
         UserQuery
     }
 }
 
 pub struct UserQuery;
 
-#[graphql_object(context = Context)]
+#[Object]
 impl UserQuery {
-    fn id(context: &Context) -> FieldResult<Uuid> {
-        let claims = context.auth.claims.as_ref().ok_or("access denied")?;
+    async fn id(&self, context: &Context<'_>) -> Result<Uuid> {
+        let claims = context
+            .data::<AuthInfo>()
+            .unwrap()
+            .claims
+            .as_ref()
+            .ok_or("access denied")?;
         Ok(claims.id)
     }
 }
 
 pub struct AuthMutation;
 
-#[graphql_object]
+#[Object]
 impl AuthMutation {
-    async fn login(context: &Context, email: String, password: String) -> FieldResult<AuthPayload> {
+    async fn login(
+        &self,
+        context: &Context<'_>,
+        email: String,
+        password: String,
+    ) -> Result<AuthPayload> {
         // Fetch user password hash from database.
         let row = sqlx::query!(
             "SELECT id, email, password_hash FROM users WHERE email = $1",
             email
         )
-        .fetch_optional(&context.pool)
+        .fetch_optional(context.data::<PgPool>().unwrap())
         .await?;
         let row = match row {
             Some(row) => row,
@@ -160,11 +169,12 @@ impl AuthMutation {
     }
 
     async fn signup(
-        context: &Context,
+        &self,
+        context: &Context<'_>,
         name: String,
         email: String,
         password: String,
-    ) -> FieldResult<SignupResult> {
+    ) -> Result<SignupResult> {
         static EMAIL_REGEX: Lazy<Regex> = Lazy::new(|| {
             Regex::new(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$")
                 .unwrap()
@@ -175,13 +185,13 @@ impl AuthMutation {
         }
         // Valid password.
         // Password must be at least 5 characters long.
-        if password.chars().count() <= 5 {
+        if password.chars().count() < 5 {
             Err("password must have at least 5 characters")?;
         }
         // TODO: add other validations.
         // Check that an account with email has not already been created.
         if sqlx::query!("SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)", email)
-            .fetch_one(&context.pool)
+            .fetch_one(context.data::<PgPool>().unwrap())
             .await?
             .exists
             == Some(true)
@@ -204,7 +214,7 @@ impl AuthMutation {
             password_hash,
             created_at,
         )
-        .fetch_one(&context.pool)
+        .fetch_one(context.data::<PgPool>().unwrap())
         .await?;
         Ok(SignupResult { id: row.id })
     }
