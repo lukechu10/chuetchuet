@@ -1,0 +1,8 @@
+{
+  "name": "@chuetchuet/common",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@chuetchuet/types": "0.1.0"
+  }
+}
