@@ -4,6 +4,6 @@
   "private": true,
   "dependencies": {
     "@chuetchuet/types": "0.1.0",
-    "nanoid": "^3.1.30"
+    "nanoid": "^3.3.4"
   }
 }

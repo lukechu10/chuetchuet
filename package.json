@@ -8,13 +8,13 @@
   "private": true,
   "scripts": {
     "dev:server": "yarn workspace @chuetchuet/server dev",
-    "dev:mobile": "yarn workspace @chuetchuet/mobile dev"
+    "dev:app": "yarn workspace @chuetchuet/app dev"
   },
   "workspaces": [
     "packages/types",
     "packages/common",
     "packages/server",
-    "packages/mobile"
+    "packages/app"
   ],
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.7.0",
