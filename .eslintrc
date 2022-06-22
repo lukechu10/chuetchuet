@@ -3,12 +3,7 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "plugins": [
-    "@typescript-eslint",
-    "prettier",
-    "simple-import-sort",
-    "truffle"
-  ],
+  "plugins": ["@typescript-eslint", "prettier", "simple-import-sort"],
   "parserOptions": {
     "ecmaVersion": 2020,
     "sourceType": "module",
@@ -25,9 +20,7 @@
     "browser": true,
     "webextensions": true,
     "amd": true,
-    "node": true,
-    "mocha": true, // for test files
-    "truffle/globals": true // same as "truffle/truffle": true
+    "node": true
   },
   "extends": [
     "eslint:recommended",

@@ -8,7 +8,7 @@ yarn
 ```
 Create and fill in the environment file `packages/server/.env.local` following the structure of `packages/server/.env.example`.
 
-If you are using VSCode, please install the Prettier extension as well as the ESLint extension.
+If you are using VSCode, please install the Prettier extension, the ESLint extension, and the GraphQL extension.
 
 ## Running
 

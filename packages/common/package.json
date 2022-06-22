@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@chuetchuet/types": "0.1.0"
+    "@chuetchuet/types": "0.1.0",
+    "nanoid": "^3.1.30"
   }
 }
