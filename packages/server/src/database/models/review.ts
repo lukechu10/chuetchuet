@@ -14,7 +14,7 @@ export const schema = new Schema<Review>({
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: true },
   ownerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  orderIds: [{ type: Schema.Types.ObjectId, ref: 'Product', required: true }],
+  orderIds: { type: [Schema.Types.ObjectId], ref: 'Product', required: true },
   rating: { type: Number, required: true },
   description: String
 });

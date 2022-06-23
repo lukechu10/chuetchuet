@@ -25,16 +25,19 @@ const schema = new Schema<Basket>({
   coverImage: { type: String, required: true },
   images: [{ type: String, required: true }],
   buyerPrice: { type: Number, required: true },
-  products: [
-    {
-      productId: {
-        type: Schema.Types.ObjectId,
-        ref: 'Product',
-        required: true
-      },
-      quantity: { type: Number, required: true }
-    }
-  ]
+  products: {
+    type: [
+      {
+        productId: {
+          type: Schema.Types.ObjectId,
+          ref: 'Product',
+          required: true
+        },
+        quantity: { type: Number, required: true }
+      }
+    ],
+    required: true
+  }
 });
 
 // eslint-disable-next-line @typescript-eslint/ban-types
