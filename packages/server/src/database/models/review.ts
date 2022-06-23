@@ -19,6 +19,5 @@ export const schema = new Schema<Review>({
   description: String
 });
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export const ReviewModel: Model<Review, {}, {}> =
+export const ReviewModel: Model<Review> =
   models.Review ?? model<Review>('Review', schema);

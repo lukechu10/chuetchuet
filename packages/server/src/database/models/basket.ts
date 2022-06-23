@@ -40,6 +40,5 @@ const schema = new Schema<Basket>({
   }
 });
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export const BasketModel: Model<Basket, {}, {}> =
+export const BasketModel: Model<Basket> =
   models.Basket ?? model<Basket>('Basket', schema);
