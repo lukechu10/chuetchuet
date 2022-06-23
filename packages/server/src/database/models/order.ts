@@ -25,6 +25,5 @@ export const schema = new Schema<Order>({
   }
 });
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export const OrderModel: Model<Order, {}, {}> =
+export const OrderModel: Model<Order> =
   models.Order ?? model<Order>('Order', schema);

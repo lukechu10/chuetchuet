@@ -31,6 +31,5 @@ const schema = new Schema<User>({
   address: String
 });
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export const UserModel: Model<User, {}, {}> =
+export const UserModel: Model<User> =
   models.User ?? model<User>('User', schema);

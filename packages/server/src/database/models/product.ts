@@ -25,6 +25,5 @@ export const schema = new Schema<Product>({
   unit: { type: String, enum: ['bucket'], required: true }
 });
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export const ProductModel: Model<Product, {}, {}> =
+export const ProductModel: Model<Product> =
   models.Product ?? model<Product>('Product', schema);
