@@ -28,6 +28,7 @@
     "plugin:jsx-a11y/recommended",
     "plugin:react-hooks/recommended",
     "@react-native-community",
+    "plugin:jest/recommended",
     "prettier",
     "plugin:prettier/recommended" // Needs to be last
   ],
@@ -43,6 +44,7 @@
     "react/prop-types": "off",
     // "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
     "@typescript-eslint/no-shadow": "off",
     "simple-import-sort/imports": "warn",
     "jsx-a11y/anchor-is-valid": [
