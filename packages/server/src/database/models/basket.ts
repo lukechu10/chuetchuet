@@ -11,6 +11,7 @@ export interface Basket {
   updatedAt: Date;
   name: string;
   description: string;
+  category: string;
   coverImage: string;
   images: string[];
   buyerPrice: number;
@@ -22,6 +23,7 @@ const schema = new Schema<Basket>({
   updatedAt: { type: Date, required: true },
   name: { type: String, required: true },
   description: { type: String, required: true },
+  category: { type: String, required: true },
   coverImage: { type: String, required: true },
   images: [{ type: String, required: true }],
   buyerPrice: { type: Number, required: true },

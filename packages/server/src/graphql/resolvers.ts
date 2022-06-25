@@ -166,6 +166,7 @@ export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         updatedAt,
         name,
         description,
+        category,
         coverImage,
         images,
         sellerPrice,
@@ -177,11 +178,13 @@ export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         updatedAt,
         name,
         description,
+        category,
         coverImage,
         images,
         sellerPrice,
         buyerPrice,
-        unit
+        unit,
+        availableQuantity: 0
       });
       return obj
         .save()
@@ -196,6 +199,7 @@ export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         updatedAt,
         name,
         description,
+        category,
         coverImage,
         images,
         buyerPrice,
@@ -206,6 +210,7 @@ export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         updatedAt,
         name,
         description,
+        category,
         coverImage,
         images,
         buyerPrice,

@@ -20,11 +20,13 @@ export interface Product {
   updatedAt: Date;
   name: string;
   description: string;
+  category: string;
   coverImage: string;
   images: string[];
   sellerPrice: number;
   buyerPrice: number;
   unit: 'bucket';
+  availableQuantity: number;
 }
 
 export interface BasketProduct {
@@ -38,6 +40,7 @@ export interface Basket {
   updatedAt: Date;
   name: string;
   description: string;
+  category: string;
   coverImage: string;
   images: string[];
   buyerPrice: number;

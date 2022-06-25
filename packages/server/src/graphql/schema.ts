@@ -29,11 +29,13 @@ export const typeDefs = gql`
     updatedAt: Date!
     name: String!
     description: String!
+    category: String!
     coverImage: String!
     images: [String!]!
     sellerPrice: Float!
     buyerPrice: Float!
     unit: Unit!
+    availableQuantity: Int!
   }
 
   type BasketProduct {
@@ -52,6 +54,7 @@ export const typeDefs = gql`
     updatedAt: Date!
     name: String!
     description: String!
+    category: String!
     coverImage: String!
     images: [String!]!
     buyerPrice: Float!
@@ -137,6 +140,7 @@ export const typeDefs = gql`
       updatedAt: Date!
       name: String!
       description: String!
+      category: String!
       coverImage: String!
       images: [String!]!
       sellerPrice: Float!
@@ -148,6 +152,7 @@ export const typeDefs = gql`
       updatedAt: Date!
       name: String!
       description: String!
+      category: String!
       coverImage: String!
       images: [String!]!
       buyerPrice: Float!
