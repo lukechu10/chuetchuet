@@ -5,8 +5,7 @@ import express from 'express';
 import http from 'http';
 
 import { connectToDatabase } from './database';
-import { resolvers } from './graphql/resolvers';
-import { typeDefs } from './graphql/schema';
+import { resolvers, typeDefs } from './graphql';
 
 async function startApolloServer(
   typeDefs?: IExecutableSchemaDefinition['typeDefs'],
