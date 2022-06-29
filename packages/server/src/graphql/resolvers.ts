@@ -1,4 +1,6 @@
 import { IExecutableSchemaDefinition } from '@graphql-tools/schema';
+import { ApolloError } from 'apollo-server-express';
+import bcrypt from 'bcrypt';
 import {
   GraphQLError,
   GraphQLResolveInfo,
@@ -6,7 +8,9 @@ import {
   Kind
 } from 'graphql';
 import { createSelectedFields } from 'graphql-fields-projection';
+import jwt from 'jsonwebtoken';
 import { Model } from 'mongoose';
+import validator from 'validator';
 
 import { toObject } from '../database';
 import { BasketModel } from '../database/models/basket';
@@ -14,7 +18,7 @@ import { OrderModel } from '../database/models/order';
 import { ProductModel } from '../database/models/product';
 import { ProductOfferModel } from '../database/models/productOffer';
 import { ReviewModel } from '../database/models/review';
-import { UserModel } from '../database/models/user';
+import { User, UserModel } from '../database/models/user';
 
 function isIsoDate(value: string) {
   if (!/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/.test(value)) return false;
@@ -284,6 +288,79 @@ export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         .catch((error) => {
           console.error(error);
         });
+    },
+
+    async login(parent, args) {
+      const { email, password } = args;
+      const obj = await UserModel.findOne({ email }).exec();
+      // Verify credentials.
+      if (!obj) {
+        throw new ApolloError('invalid credentials');
+      }
+      if (!(await bcrypt.compare(password, obj.passwordHash))) {
+        throw new ApolloError('invalid credentials');
+      }
+
+      const token = tokenFromUser(obj);
+      return { token };
+    },
+    async signup(parent, args) {
+      const { email, password, name, isSeller, phoneNumber, address } = args;
+      // Validate email.
+      if (!validator.isEmail(email)) {
+        throw new ApolloError('invalid email');
+      }
+      // Validate password.
+      if (password.length <= 5) {
+        // TODO: add some more password requirements and document them.
+        throw new ApolloError('password must be at least 6 characters long');
+      }
+
+      // Check if email is already taken.
+      const existingUser = await UserModel.findOne({ email }).exec();
+      if (existingUser) {
+        throw new ApolloError('email is already taken');
+      }
+
+      const saltRounds = 10;
+      const passwordHash = await bcrypt.hash(password, saltRounds);
+
+      const createdAt = new Date();
+      const obj = new UserModel({
+        createdAt,
+        updatedAt: createdAt,
+        email,
+        name,
+        isSeller,
+        phoneNumber,
+        address,
+        emailVerified: false,
+        isAdmin: false,
+        passwordHash
+      });
+      obj
+        .save()
+        .then((result) => toObject(result))
+        .catch((error) => {
+          console.error(error);
+        });
+      const token = tokenFromUser(obj);
+      return { token };
     }
   }
 };
+
+const JWT_SECRET = process.env.JWT_SECRET as string;
+
+/**
+ * Create a new [JSON Web Token](https://jwt.io/) from the given `User`.
+ */
+async function tokenFromUser(user: User): Promise<string> {
+  const payload = {
+    name: user.name,
+    email: user.email
+  };
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: '365 days'
+  });
+}

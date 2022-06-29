@@ -122,6 +122,10 @@ export const typeDefs = gql`
     reviews: [Review!]!
   }
 
+  type AuthResult {
+    token: String!
+  }
+
   type Mutation {
     addUser(
       createdAt: Date!
@@ -134,7 +138,7 @@ export const typeDefs = gql`
       passwordHash: String!
       phoneNumber: String
       address: String
-    ): User
+    ): User @deprecated(reason: "use signup instead")
     addProduct(
       createdAt: Date!
       updatedAt: Date!
@@ -183,5 +187,15 @@ export const typeDefs = gql`
       rating: Int!
       description: String
     ): Review
+
+    login(email: String!, password: String!): AuthResult!
+    signup(
+      email: String!
+      password: String!
+      name: String!
+      isSeller: Boolean!
+      phoneNumber: String!
+      address: String!
+    ): AuthResult!
   }
 `;
