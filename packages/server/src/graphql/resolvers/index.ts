@@ -12,13 +12,13 @@ import jwt from 'jsonwebtoken';
 import { Model } from 'mongoose';
 import validator from 'validator';
 
-import { toObject } from '../database';
-import { BasketModel } from '../database/models/basket';
-import { OrderModel } from '../database/models/order';
-import { ProductModel } from '../database/models/product';
-import { ProductOfferModel } from '../database/models/productOffer';
-import { ReviewModel } from '../database/models/review';
-import { User, UserModel } from '../database/models/user';
+import { toObject } from '../../database';
+import { BasketModel } from '../../database/models/basket';
+import { OrderModel } from '../../database/models/order';
+import { ProductModel } from '../../database/models/product';
+import { ProductOfferModel } from '../../database/models/productOffer';
+import { ReviewModel } from '../../database/models/review';
+import { User, UserModel } from '../../database/models/user';
 
 function isIsoDate(value: string) {
   if (!/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/.test(value)) return false;
