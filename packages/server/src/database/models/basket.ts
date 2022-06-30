@@ -18,29 +18,30 @@ export interface Basket {
   products: BasketProduct[];
 }
 
-const schema = new Schema<Basket>({
-  createdAt: { type: Date, required: true },
-  updatedAt: { type: Date, required: true },
-  name: { type: String, required: true },
-  description: { type: String, required: true },
-  category: { type: String, required: true },
-  coverImage: { type: String, required: true },
-  images: [{ type: String, required: true }],
-  buyerPrice: { type: Number, required: true },
-  products: {
-    type: [
-      {
-        productId: {
-          type: Schema.Types.ObjectId,
-          ref: 'Product',
-          required: true
-        },
-        quantity: { type: Number, required: true }
-      }
-    ],
-    required: true
-  }
-});
+const schema = new Schema<Basket>(
+  {
+    name: { type: String, required: true },
+    description: { type: String, required: true },
+    category: { type: String, required: true },
+    coverImage: { type: String, required: true },
+    images: [{ type: String, required: true }],
+    buyerPrice: { type: Number, required: true },
+    products: {
+      type: [
+        {
+          productId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Product',
+            required: true
+          },
+          quantity: { type: Number, required: true }
+        }
+      ],
+      required: true
+    }
+  },
+  { timestamps: true }
+);
 
 export const BasketModel: Model<Basket> =
   models.Basket ?? model<Basket>('Basket', schema);

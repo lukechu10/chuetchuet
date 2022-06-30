@@ -43,6 +43,6 @@ export async function connectToDatabase() {
 
 export function toObject<T extends Document>(document: T) {
   const result = document.toObject();
-  result.id = result._id;
+  result.id = result._id.toString();
   return result;
 }

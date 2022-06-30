@@ -124,8 +124,6 @@ export const typeDefs = gql`
 
   type Mutation {
     addUser(
-      createdAt: Date!
-      updatedAt: Date!
       name: String!
       avatar: String
       biography: String
@@ -135,9 +133,18 @@ export const typeDefs = gql`
       phoneNumber: String
       address: String
     ): User
+    updateUser(
+      id: ID!
+      name: String
+      avatar: String
+      biography: String
+      isSeller: Boolean
+      email: String
+      passwordHash: String
+      phoneNumber: String
+      address: String
+    ): User
     addProduct(
-      createdAt: Date!
-      updatedAt: Date!
       name: String!
       description: String!
       category: String!
@@ -148,8 +155,6 @@ export const typeDefs = gql`
       unit: Unit!
     ): Product
     addBasket(
-      createdAt: Date!
-      updatedAt: Date!
       name: String!
       description: String!
       category: String!
@@ -159,16 +164,12 @@ export const typeDefs = gql`
       products: [BasketProductInput]!
     ): Basket
     addProductOffer(
-      createdAt: Date!
-      updatedAt: Date!
       ownerId: ID!
       productId: ID!
       quantity: Int!
       status: ProductOfferStatus!
     ): ProductOffer
     addOrder(
-      createdAt: Date!
-      updatedAt: Date!
       ownerId: ID!
       productId: ID!
       pickupLocation: String!
@@ -176,8 +177,6 @@ export const typeDefs = gql`
       status: OrderStatus!
     ): Order
     addReview(
-      createdAt: Date!
-      updatedAt: Date!
       ownerId: ID!
       orderIds: [ID!]!
       rating: Int!

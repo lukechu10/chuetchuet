@@ -1,4 +1,5 @@
 import { IExecutableSchemaDefinition } from '@graphql-tools/schema';
+import { ApolloError } from 'apollo-server-express';
 import {
   GraphQLError,
   GraphQLResolveInfo,
@@ -128,8 +129,6 @@ export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
   Mutation: {
     async addUser(parent, args) {
       const {
-        createdAt,
-        updatedAt,
         name,
         avatar,
         biography,
@@ -140,8 +139,6 @@ export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         address
       } = args;
       const obj = new UserModel({
-        createdAt,
-        updatedAt,
         name,
         avatar,
         biography,
@@ -160,10 +157,33 @@ export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
           console.error(error);
         });
     },
+    async updateUser(parent, args) {
+      const {
+        id,
+        name,
+        avatar,
+        biography,
+        isSeller,
+        email,
+        passwordHash,
+        phoneNumber,
+        address
+      } = args;
+      const user = await UserModel.findById(id);
+      if (!user) return new ApolloError('User not found');
+      if (name !== undefined) user.name = name;
+      if (avatar !== undefined) user.avatar = avatar;
+      if (biography !== undefined) user.biography = biography;
+      if (isSeller !== undefined) user.isSeller = isSeller;
+      if (email !== undefined) user.email = email;
+      if (passwordHash !== undefined) user.passwordHash = passwordHash;
+      if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
+      if (address !== undefined) user.address = address;
+      await user.save();
+      return toObject(user);
+    },
     async addProduct(parent, args) {
       const {
-        createdAt,
-        updatedAt,
         name,
         description,
         category,
@@ -174,8 +194,6 @@ export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         unit
       } = args;
       const obj = new ProductModel({
-        createdAt,
-        updatedAt,
         name,
         description,
         category,
@@ -195,8 +213,6 @@ export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
     },
     async addBasket(parent, args) {
       const {
-        createdAt,
-        updatedAt,
         name,
         description,
         category,
@@ -206,8 +222,6 @@ export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         products
       } = args;
       const obj = new BasketModel({
-        createdAt,
-        updatedAt,
         name,
         description,
         category,
@@ -224,11 +238,8 @@ export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         });
     },
     async addProductOffer(parent, args) {
-      const { createdAt, updatedAt, ownerId, productId, quantity, status } =
-        args;
+      const { ownerId, productId, quantity, status } = args;
       const obj = new ProductOfferModel({
-        createdAt,
-        updatedAt,
         ownerId,
         productId,
         quantity,
@@ -242,18 +253,8 @@ export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         });
     },
     async addOrder(parent, args) {
-      const {
-        createdAt,
-        updatedAt,
-        ownerId,
-        productId,
-        pickupLocation,
-        quantity,
-        status
-      } = args;
+      const { ownerId, productId, pickupLocation, quantity, status } = args;
       const obj = new OrderModel({
-        createdAt,
-        updatedAt,
         ownerId,
         productId,
         pickupLocation,
@@ -268,11 +269,8 @@ export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
         });
     },
     async addReview(parent, args) {
-      const { createdAt, updatedAt, ownerId, orderIds, rating, description } =
-        args;
+      const { ownerId, orderIds, rating, description } = args;
       const obj = new ReviewModel({
-        createdAt,
-        updatedAt,
         ownerId,
         orderIds,
         rating,
