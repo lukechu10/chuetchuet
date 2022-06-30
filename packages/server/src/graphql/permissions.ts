@@ -10,10 +10,6 @@ const isLoggedin = rule({ cache: 'contextual' })(
 
 const isOwner = rule({ cache: 'contextual' })(
   async (parent, args, { user }) => {
-    // user = {
-    //   id: '62b8b3c8bd56db611aa4b0b0'
-    // };
-    // console.log('info', parent, args, user);
     if (!user) return new ForbiddenError('Not Authorized');
     if (user.isAdmin) return true;
     if (
@@ -39,7 +35,8 @@ export const permissions = shield({
   },
   Mutation: {
     '*': isAdmin,
-    addUser: allow,
+    login: allow,
+    signup: allow,
     updateUser: isOwner,
     addProductOffer: isLoggedin,
     // updateProductOffer: isOwner,
@@ -47,6 +44,9 @@ export const permissions = shield({
     // updateOrder: isOwner,
     addReview: isLoggedin
     // updateReview: isOwner
+  },
+  AuthResult: {
+    token: allow
   },
   User: {
     email: isOwner,

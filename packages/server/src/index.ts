@@ -7,11 +7,11 @@ import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 import { applyMiddleware } from 'graphql-middleware';
 import http from 'http';
+import jwt from 'jsonwebtoken';
 
 import { connectToDatabase } from './database';
+import { resolvers, typeDefs } from './graphql';
 import { permissions } from './graphql/permissions';
-import { resolvers } from './graphql/resolvers';
-import { typeDefs } from './graphql/schema';
 
 async function startApolloServer(
   typeDefs: IExecutableSchemaDefinition['typeDefs'],
@@ -28,7 +28,10 @@ async function startApolloServer(
     cache: 'bounded',
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     context: ({ req }) => {
-      // TODO: Authentication here
+      if (typeof req.headers.authorization !== 'string') return;
+      const user = jwt.decode(req.headers.authorization);
+      if (!user || typeof user === 'string') return;
+      return { user };
     }
   });
   await server.start();

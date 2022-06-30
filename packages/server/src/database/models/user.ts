@@ -1,16 +1,19 @@
 import { Model, model, models, Schema } from 'mongoose';
 
-export interface User {
+export interface AuthUser {
   id: string;
-  createdAt: Date;
-  updatedAt: Date;
   name: string;
   avatar?: string;
-  biography?: string;
   isSeller: boolean;
   isAdmin: boolean;
   email: string;
   emailVerified: boolean;
+}
+
+export interface User extends AuthUser {
+  createdAt: Date;
+  updatedAt: Date;
+  biography?: string;
   passwordHash: string;
   phoneNumber?: string;
   address?: string;
