@@ -34,6 +34,10 @@ export const typeDefs = gql`
     Get a list of all users.
     """
     users: [User!]!
+    """
+    Get self user (using auth token).
+    """
+    self: User
   }
 
   extend type Mutation {
@@ -54,7 +58,11 @@ export const typeDefs = gql`
 export const resolvers: IExecutableSchemaDefinition['resolvers'] = {
   Query: {
     user: resolveQuerySingle(UserModel),
-    users: resolveQueryAll(UserModel)
+    users: resolveQueryAll(UserModel),
+    async self(parent, args, context) {
+      const id = context.user.id;
+      return resolveQuerySingle(UserModel)(parent, { id });
+    }
   },
   Mutation: {
     async updateUser(parent, args) {
