@@ -9,8 +9,12 @@
     "test": "jest"
   },
   "dependencies": {
+    "@urql/core": "^2.6.0",
+    "graphql": "^16.5.0",
+    "jotai": "^1.7.5",
     "react": "18.0.0",
-    "react-native": "0.69.0"
+    "react-native": "0.69.0",
+    "wonka": "^4.0.15"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
