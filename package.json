@@ -18,10 +18,6 @@
       "packages/common",
       "packages/server",
       "packages/app"
-    ],
-    "nohoist": [
-      "**/react-native",
-      "**/react-native/**"
     ]
   },
   "devDependencies": {
