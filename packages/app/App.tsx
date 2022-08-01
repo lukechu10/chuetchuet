@@ -1,6 +1,8 @@
 import React from 'react';
 import { SafeAreaView, ScrollView, StatusBar, Text, View } from 'react-native';
 
+import { Title, Wrapper } from './components/productList/ProductItem';
+
 const App = () => {
   return (
     <SafeAreaView>
@@ -9,6 +11,9 @@ const App = () => {
         <View>
           <Text>Chuetchuet</Text>
         </View>
+        <Wrapper>
+          <Title>Hello World</Title>
+        </Wrapper>
       </ScrollView>
     </SafeAreaView>
   );
