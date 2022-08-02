@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { GestureResponderEvent, ImageSourcePropType } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import styled from 'styled-components/native';
+
+import { QUANTITY_PER_UNIT } from '../../util/constants';
 
 const ItemContainer = styled.View`
   border-radius: 30px;
   margin: 18px;
+  margin-bottom: 0;
   background: #f4f4f4;
   display: flex;
   flex-direction: row;
@@ -30,7 +34,7 @@ const ItemHeader = styled.View`
   align-items: center;
 `;
 
-const ItemSubheader = styled.View`
+const ItemSubHeader = styled.View`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -54,6 +58,7 @@ const ItemSelector = styled.View`
   background: #84d182;
   border-radius: 8px;
   padding: 4px;
+  height: 26px;
 `;
 
 const ItemSelectorIconContainer = styled.View`
@@ -89,9 +94,9 @@ const ItemSizeButton = styled.TouchableOpacity`
   flex: 1;
 `;
 
-const ItemSizeContainer = styled.View`
+const ItemSizeContainer = styled.View<{ selected: boolean }>`
   border-radius: 8px;
-  background: #d9d9d9;
+  background: ${({ selected }) => (selected ? '#B8B8B8' : '#d9d9d9')};
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -103,16 +108,20 @@ const ItemSizeType = styled.Text`
 `;
 
 const ItemSizeImageContainer = styled.View`
-  padding-left: 16px;
-  padding-right: 16px;
   margin-top: 4px;
   margin-bottom: 4px;
   width: 100%;
+  padding-left: 16px;
+  padding-right: 16px;
+`;
+
+const ItemSizeImageSubContainer = styled.View`
+  aspect-ratio: 1;
 `;
 
 const ItemSizeImage = styled.Image`
-  aspect-ratio: 1;
   width: 100%;
+  height: 100%;
 `;
 
 const ItemSizePrice = styled.Text`
@@ -124,55 +133,164 @@ const ItemSizeSpacer = styled.View`
   width: 8px;
 `;
 
-function ItemSize() {
+interface ItemSizeProps {
+  sizeType: string;
+  sizeImage: ImageSourcePropType;
+  sizePrice: number;
+  selected: boolean;
+  onPress: (event: GestureResponderEvent) => void;
+}
+
+function ItemSize({
+  sizeType,
+  sizeImage,
+  sizePrice,
+  selected,
+  onPress
+}: ItemSizeProps) {
   return (
-    <ItemSizeButton>
-      <ItemSizeContainer>
-        <ItemSizeType>Sac</ItemSizeType>
+    <ItemSizeButton activeOpacity={0.8} onPress={onPress}>
+      <ItemSizeContainer selected={selected}>
+        <ItemSizeType>{sizeType}</ItemSizeType>
         <ItemSizeImageContainer>
-          <ItemSizeImage
-            source={{
-              uri: 'https://images.immediate.co.uk/production/volatile/sites/30/2017/01/Bananas-218094b-scaled.jpg'
-            }}
-          />
+          <ItemSizeImageSubContainer>
+            <ItemSizeImage source={sizeImage} />
+          </ItemSizeImageSubContainer>
         </ItemSizeImageContainer>
-        <ItemSizePrice>28000 CFA</ItemSizePrice>
+        <ItemSizePrice>{sizePrice} CFA</ItemSizePrice>
       </ItemSizeContainer>
     </ItemSizeButton>
   );
 }
 
-export function ProductItem() {
+interface ProductItemProps {
+  name: string;
+  availableQuantity: number;
+  price: number; // For a bucket
+  coverImage: string;
+}
+
+export function ProductItem({
+  name,
+  availableQuantity,
+  price,
+  coverImage
+}: ProductItemProps) {
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [selectedQuantity, setSelectedQuantity] = useState(0);
+  const [selectedType, setSelectedType] = useState<'bag' | 'bucket' | 'tub'>(
+    'bucket'
+  );
+
+  const getNewQuantityAndSetTotalPrice = useCallback(
+    (newQuantity: number, selectedType: 'bag' | 'bucket' | 'tub') => {
+      if (newQuantity < 0) {
+        newQuantity = 0;
+      }
+      if (newQuantity > availableQuantity / QUANTITY_PER_UNIT[selectedType]) {
+        newQuantity = Math.floor(
+          availableQuantity / QUANTITY_PER_UNIT[selectedType]
+        );
+      }
+      setTotalPrice(newQuantity * price * QUANTITY_PER_UNIT[selectedType]);
+      return newQuantity;
+    },
+    [availableQuantity, price]
+  );
+
+  const changeQuantity = useCallback(
+    (direction: number) => {
+      setSelectedQuantity((oldQuantity) =>
+        getNewQuantityAndSetTotalPrice(oldQuantity + direction, selectedType)
+      );
+    },
+    [getNewQuantityAndSetTotalPrice, selectedType]
+  );
+
+  const selectType = useCallback(
+    (type: 'bag' | 'bucket' | 'tub') => {
+      setSelectedType(type);
+      setSelectedQuantity((quantity) =>
+        getNewQuantityAndSetTotalPrice(quantity === 0 ? 1 : quantity, type)
+      );
+    },
+    [getNewQuantityAndSetTotalPrice]
+  );
+
+  const isSoldOut = useMemo(() => {
+    return (
+      Math.floor(availableQuantity / QUANTITY_PER_UNIT[selectedType]) === 0
+    );
+  }, [availableQuantity, selectedType]);
+
   return (
     <ItemContainer>
       <ItemImage
         source={{
-          uri: 'https://images.immediate.co.uk/production/volatile/sites/30/2017/01/Bananas-218094b-scaled.jpg'
+          uri: coverImage
         }}
       />
       <ItemInfo>
         <ItemHeader>
-          <ItemTitle>Banane</ItemTitle>
+          <ItemTitle>{name}</ItemTitle>
           <ItemSelector>
-            <ItemSelectorIconContainer>
-              <Entypo name="minus" size={14} color="#ffffff" />
-            </ItemSelectorIconContainer>
-            <ItemSelectorQuantity>1</ItemSelectorQuantity>
-            <ItemSelectorIconContainer>
-              <Entypo name="plus" size={14} color="#ffffff" />
-            </ItemSelectorIconContainer>
+            {selectedQuantity > 0 ? (
+              <>
+                <ItemSelectorIconContainer>
+                  <Entypo
+                    name="minus"
+                    size={14}
+                    color="#ffffff"
+                    onPress={() => changeQuantity(-1)}
+                  />
+                </ItemSelectorIconContainer>
+                <ItemSelectorQuantity>{selectedQuantity}</ItemSelectorQuantity>
+                <ItemSelectorIconContainer>
+                  <Entypo
+                    name="plus"
+                    size={14}
+                    color="#ffffff"
+                    onPress={() => changeQuantity(1)}
+                  />
+                </ItemSelectorIconContainer>
+              </>
+            ) : isSoldOut ? (
+              <ItemSelectorQuantity>Rupture de stock</ItemSelectorQuantity>
+            ) : (
+              <ItemSelectorQuantity onPress={() => changeQuantity(1)}>
+                Ajouter
+              </ItemSelectorQuantity>
+            )}
           </ItemSelector>
         </ItemHeader>
-        <ItemSubheader>
+        <ItemSubHeader>
           <ChooseSizeText>Choisir la taille</ChooseSizeText>
-          <PriceText>8000 CFA</PriceText>
-        </ItemSubheader>
+          <PriceText>{totalPrice} CFA</PriceText>
+        </ItemSubHeader>
         <ItemFooter>
-          <ItemSize />
+          <ItemSize
+            sizeType="Sac"
+            sizeImage={require('../../assets/images/placeholder.png')}
+            sizePrice={price * QUANTITY_PER_UNIT.bag}
+            selected={selectedType === 'bag'}
+            onPress={() => selectType('bag')}
+          />
           <ItemSizeSpacer />
-          <ItemSize />
+          <ItemSize
+            sizeType="Seau"
+            sizeImage={require('../../assets/images/placeholder.png')}
+            sizePrice={price * QUANTITY_PER_UNIT.bucket}
+            selected={selectedType === 'bucket'}
+            onPress={() => selectType('bucket')}
+          />
           <ItemSizeSpacer />
-          <ItemSize />
+          <ItemSize
+            sizeType="Bassine"
+            sizeImage={require('../../assets/images/placeholder.png')}
+            sizePrice={price * QUANTITY_PER_UNIT.tub}
+            selected={selectedType === 'tub'}
+            onPress={() => selectType('tub')}
+          />
         </ItemFooter>
       </ItemInfo>
     </ItemContainer>
