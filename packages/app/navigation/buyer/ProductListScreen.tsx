@@ -1,8 +1,10 @@
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
 import { SafeAreaView, StatusBar } from 'react-native';
 import styled from 'styled-components/native';
 
 import { ProductItem } from '../../components/productList/ProductItem';
+import { MainStackParamList, Screens } from '../screens';
 
 const ScrollView = styled.ScrollView.attrs({
   contentContainerStyle: { flexGrow: 1 }
@@ -10,7 +12,14 @@ const ScrollView = styled.ScrollView.attrs({
   height: 100%;
 `;
 
-export default function HomeScreen() {
+type ProductListScreenProps = NativeStackScreenProps<
+  MainStackParamList,
+  Screens.BuyerProductList
+>;
+
+export default function ProductListScreen({
+  navigation
+}: ProductListScreenProps) {
   return (
     <SafeAreaView>
       <StatusBar />

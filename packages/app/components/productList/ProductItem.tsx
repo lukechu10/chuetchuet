@@ -163,7 +163,7 @@ function ItemSize({
   );
 }
 
-interface ProductItemProps {
+export interface ProductItemProps {
   name: string;
   availableQuantity: number;
   price: number; // For a bucket
