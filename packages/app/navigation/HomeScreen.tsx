@@ -14,6 +14,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         onPress={() => navigation.navigate(Screens.BuyerProductCategories)}
         title="Acheter"
       />
+      <Button
+        onPress={() => navigation.navigate(Screens.SellerProductCategories)}
+        title="Vendre"
+      />
     </View>
   );
 }

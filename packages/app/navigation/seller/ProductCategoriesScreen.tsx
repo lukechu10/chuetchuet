@@ -9,7 +9,7 @@ import { MainStackParamList, Screens } from '../screens';
 
 type ProductCategoriesScreenProps = NativeStackScreenProps<
   MainStackParamList,
-  Screens.BuyerProductCategories
+  Screens.SellerProductCategories
 >;
 
 export default function ProductCategoriesScreen({
@@ -17,7 +17,7 @@ export default function ProductCategoriesScreen({
 }: ProductCategoriesScreenProps) {
   const showProductList = useCallback(
     (productCategory: ProductCategory) => {
-      navigation.navigate(Screens.BuyerProductList, { productCategory });
+      navigation.navigate(Screens.SellerProductList, { productCategory });
     },
     [navigation]
   );
